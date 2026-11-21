@@ -1,4 +1,4 @@
-import { useState, type SubmitEvent } from "react";
+import { useRef, useState, type SubmitEvent } from "react";
 import { parseAmountToCents } from "../lib/money";
 import type { Expense } from "../types";
 
@@ -24,11 +24,11 @@ export const ExpenseForm = ({
   };
 
   const [values, setValues] = useState<FormValues>(initialState);
+  const labelRef = useRef<HTMLInputElement>(null);
 
   const update = (field: keyof FormValues, value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }));
   };
-
   const amountCents = parseAmountToCents(values.amount);
   const labelError = values.label.trim() === "";
   const isValid = !labelError && amountCents !== null;
@@ -45,11 +45,13 @@ export const ExpenseForm = ({
       settled: initial?.settled ?? false,
     });
     setValues(initialState);
+    labelRef.current?.focus();
   };
 
   return (
     <form className="expense-form" onSubmit={handleSubmit}>
       <input
+        ref={labelRef}
         placeholder="Libellé"
         value={values.label}
         onChange={(e) => update("label", e.target.value)}

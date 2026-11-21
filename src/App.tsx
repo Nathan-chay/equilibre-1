@@ -1,23 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { initialExpenses, initialGroups } from "./data";
 import { formatEUR } from "./lib/format";
 import { ExpenseForm } from "./components/ExpenseForm";
-import type { Expense, Group } from "./types";
+import type { Expense } from "./types";
 import { ExpenseList } from "./components/ExpenseList";
 import { NewMemberForm } from "./components/NewMemberForm";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 
 export const App = () => {
-  const [expenses, setExpenses] = useState(initialExpenses);
+  const [expenses, setExpenses] = useLocalStorage(
+    "equilibre.v1.expenses",
+    initialExpenses,
+  );
+  const [groups, setGroups] = useLocalStorage(
+    "equilibre.v1.groups",
+    initialGroups,
+  );
   const [searchValue, setSearchValue] = useState("");
-  const [groups, setGroups] = useState<Group[]>(initialGroups);
   const [groupId, setGroupId] = useState(initialGroups[0].id);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const group = groups.find((g) => g.id === groupId);
+  const group = groups.find((g) => g.id === groupId) ?? groups[0];
 
   const members = group?.members ?? [];
   const groupExpenses = expenses.filter((e) => e.groupId === groupId);
   const editing = groupExpenses.find((e) => e.id === editingId);
+
+  useEffect(() => {
+    window.document.title = `${group.name} - Equilibre`;
+  }, [group.name]);
 
   const saveExpense = (expense: Expense) => {
     setExpenses((prev) =>
