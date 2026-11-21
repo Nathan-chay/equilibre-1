@@ -13,16 +13,16 @@ type ExpenseFormProps = {
 
 export const ExpenseForm = ({
   members,
-  onAdd,
   groupId,
   onSave,
   initial,
 }: ExpenseFormProps) => {
   const initialState = {
-    amount: "",
-    label: "",
-    paidBy: members[0],
+    label: initial ? initial.label : "",
+    paidBy: initial ? initial.paidBy : members[0],
+    amount: initial ? (initial.amountCents / 100).toString() : "",
   };
+
   const [values, setValues] = useState<FormValues>(initialState);
 
   const update = (field: keyof FormValues, value: string) => {
@@ -36,12 +36,13 @@ export const ExpenseForm = ({
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!isValid || amountCents === null) return;
-    onAdd({
+    onSave({
       amountCents,
-      id: crypto.randomUUID(),
+      groupId,
+      id: initial?.id ?? crypto.randomUUID(),
       label: values.label.trim(),
       paidBy: values.paidBy,
-      settled: false,
+      settled: initial?.settled ?? false,
     });
     setValues(initialState);
   };

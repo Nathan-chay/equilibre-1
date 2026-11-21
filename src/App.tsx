@@ -1,32 +1,23 @@
 import { useState } from "react";
-import { ExpenseItem } from "./components/ExpenseItem";
-import { initialExpenses } from "./data";
+import { initialExpenses, initialGroups } from "./data";
 import { formatEUR } from "./lib/format";
 import { ExpenseForm } from "./components/ExpenseForm";
 import type { Expense, Group } from "./types";
 import { ExpenseList } from "./components/ExpenseList";
-
-export const initialGroups: Group[] = [
-  { id: "g1", name: "Colocation", members: ["Léa", "Tom"] },
-  { id: "g2", name: "Week-end Bretagne", members: ["Léa", "Tom", "Sam"] },
-];
-
-const members = ["Ahmed", "Yassin", "Nathan", "Lyza"];
+import { NewMemberForm } from "./components/NewMemberForm";
 
 export const App = () => {
   const [expenses, setExpenses] = useState(initialExpenses);
   const [searchValue, setSearchValue] = useState("");
   const [groups, setGroups] = useState<Group[]>(initialGroups);
   const [groupId, setGroupId] = useState(initialGroups[0].id);
-  console.log("🚀 ~ App ~ groupId:", groupId);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const group = groups.find((g) => g.id === groupId);
 
+  const members = group?.members ?? [];
   const groupExpenses = expenses.filter((e) => e.groupId === groupId);
-  console.log("🚀 ~ App ~ groupExpenses:", groupExpenses);
   const editing = groupExpenses.find((e) => e.id === editingId);
-  console.log("🚀 ~ App ~ editing:", editing);
 
   const saveExpense = (expense: Expense) => {
     setExpenses((prev) =>
@@ -49,8 +40,9 @@ export const App = () => {
     setExpenses((prev) => prev.filter((e) => e.id !== id));
   };
 
-  const addExpense = (expense: Expense) => {
-    setExpenses((prev) => [...prev, expense]);
+  const handleGroupChange = (groupId: string) => {
+    setGroupId(groupId);
+    setEditingId(null);
   };
 
   const handleToggle = (id: string) => {
@@ -60,24 +52,39 @@ export const App = () => {
   };
 
   const handleEdit = (id: string) => {
-    console.log("🚀 ~ handleEdit ~ id:", id);
-
     setEditingId(id);
   };
 
-  const visible = expenses.filter((expense) =>
+  const visible = groupExpenses.filter((expense) =>
     expense.label.toLowerCase().includes(searchValue.toLowerCase()),
   );
 
-  const totalNotPaid = expenses.reduce(
+  const totalNotPaid = groupExpenses.reduce(
     (sum, expense) => (expense.settled ? sum : sum + expense.amountCents),
     0,
   );
 
   return (
     <main className="app">
-      <ExpenseForm members={members} onAdd={addExpense} />
-
+      <select
+        name="groupId"
+        value={groupId}
+        onChange={(e) => handleGroupChange(e.target.value)}
+      >
+        {groups.map((g) => (
+          <option key={g.id} value={g.id}>
+            {g.name}
+          </option>
+        ))}
+      </select>
+      <NewMemberForm groupId={groupId} members={members} onSave={addMember} />
+      <ExpenseForm
+        members={members}
+        onSave={saveExpense}
+        groupId={groupId}
+        initial={editing}
+        key={`${groupId}-${editing?.id ?? "new"}`}
+      />
       <input
         value={searchValue}
         onChange={(e) => {

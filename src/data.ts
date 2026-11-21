@@ -1,4 +1,4 @@
-import type { Expense } from "./types";
+import type { Expense, Group } from "./types";
 
 export const initialExpenses: Expense[] = [
   {
@@ -25,4 +25,9 @@ export const initialExpenses: Expense[] = [
     settled: false,
     groupId: "g2",
   },
+];
+
+export const initialGroups: Group[] = [
+  { id: "g1", name: "Colocation", members: ["Léa", "Tom"] },
+  { id: "g2", name: "Week-end Bretagne", members: ["Léa", "Tom", "Sam"] },
 ];
