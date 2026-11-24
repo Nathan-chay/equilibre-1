@@ -1,5 +1,4 @@
 import { useCurrency } from "../context/CurrencyContext";
-import { formatEUR } from "../lib/format";
 
 type ExpenseItemProps = {
   label: string;

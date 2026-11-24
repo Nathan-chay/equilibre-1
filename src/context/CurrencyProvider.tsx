@@ -1,18 +1,22 @@
 import { useState, type ReactNode } from "react"
 import type { Currency } from "../types"
-import { formatMoney } from "../lib/format"
-import { fakeRate } from "../data"
+import { formatEUR, formatMoney } from "../lib/format"
 import { CurrencyContext } from "./CurrencyContext"
+import { useRate } from "../hooks/useRate"
 
 type CurrencyProviderProps = {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export const CurrencyProvider = ({children}: CurrencyProviderProps) => {
   const [currency, setCurrency] = useState<Currency>("EUR");
+  const {error, loading, rate} = useRate(currency);
 
   const formatAmount = (cents: number) => {
-    return formatMoney(cents, currency, fakeRate[currency]);
+    if(rate === null) {
+      return formatEUR(cents);
+    }
+    return formatMoney(cents, currency, rate);
   }
 
   return(
@@ -20,6 +24,8 @@ export const CurrencyProvider = ({children}: CurrencyProviderProps) => {
       currency,
       formatAmount,
       setCurrency,
+      error,
+      loading,
     }}>
       {children}
     </CurrencyContext>
