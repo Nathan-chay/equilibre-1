@@ -72,7 +72,7 @@ export const ExpenseForm = ({
         ))}
       </select>
       <button type="submit" disabled={!isValid}>
-        Ajouter
+        {initial ? 'Modifier' : 'Ajouter'}
       </button>
     </form>
   );

@@ -1,17 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { initialExpenses, initialGroups } from "./data";
-import { formatEUR } from "./lib/format";
 import { ExpenseForm } from "./components/ExpenseForm";
 import type { Expense } from "./types";
 import { ExpenseList } from "./components/ExpenseList";
 import { NewMemberForm } from "./components/NewMemberForm";
 import { useLocalStorage } from "./hooks/useLocalStorage";
+import { expensesReducer } from "./state/expensesReducer";
+import { loadExpenses, saveExpenses } from "./state/expensesStorage";
+import { CurrencySelect } from "./components/CurrencySelect";
+import { useCurrency } from "./context/CurrencyContext";
 
 export const App = () => {
-  const [expenses, setExpenses] = useLocalStorage(
-    "equilibre.v1.expenses",
-    initialExpenses,
-  );
+  const [expenses, dispatch] = useReducer(expensesReducer, initialExpenses, loadExpenses)
   const [groups, setGroups] = useLocalStorage(
     "equilibre.v1.groups",
     initialGroups,
@@ -19,6 +19,7 @@ export const App = () => {
   const [searchValue, setSearchValue] = useState("");
   const [groupId, setGroupId] = useState(initialGroups[0].id);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const { formatAmount } = useCurrency()
 
   const group = groups.find((g) => g.id === groupId) ?? groups[0];
 
@@ -30,12 +31,12 @@ export const App = () => {
     window.document.title = `${group.name} - Equilibre`;
   }, [group.name]);
 
+  useEffect(() => {
+    saveExpenses(expenses);
+  }, [expenses])
+
   const saveExpense = (expense: Expense) => {
-    setExpenses((prev) =>
-      prev.some((e) => e.id === expense.id)
-        ? prev.map((e) => (e.id === expense.id ? expense : e))
-        : [...prev, expense],
-    );
+    dispatch({ type: 'saved', expense }) 
     setEditingId(null);
   };
 
@@ -48,7 +49,7 @@ export const App = () => {
   };
 
   const handleDelete = (id: string) => {
-    setExpenses((prev) => prev.filter((e) => e.id !== id));
+    dispatch({ type: 'deleted', id }) 
   };
 
   const handleGroupChange = (groupId: string) => {
@@ -57,9 +58,7 @@ export const App = () => {
   };
 
   const handleToggle = (id: string) => {
-    setExpenses((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, settled: !e.settled } : e)),
-    );
+    dispatch({ type: 'toggled', id }) 
   };
 
   const handleEdit = (id: string) => {
@@ -88,6 +87,7 @@ export const App = () => {
           </option>
         ))}
       </select>
+      <CurrencySelect  />
       <NewMemberForm groupId={groupId} members={members} onSave={addMember} />
       <ExpenseForm
         members={members}
@@ -111,7 +111,7 @@ export const App = () => {
       />
       <p className="summary">
         <span>Reste à régler</span>
-        <strong>{formatEUR(totalNotPaid)}</strong>
+        <strong>{formatAmount(totalNotPaid)}</strong>
       </p>
     </main>
   );

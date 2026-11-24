@@ -12,3 +12,5 @@ export type Group = {
   name: string;
   members: string[];
 };
+
+export type Currency = 'EUR' | 'USD' | 'GBP' | 'CHF' | 'CAD'

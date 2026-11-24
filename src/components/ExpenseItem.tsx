@@ -1,3 +1,4 @@
+import { useCurrency } from "../context/CurrencyContext";
 import { formatEUR } from "../lib/format";
 
 type ExpenseItemProps = {
@@ -19,6 +20,7 @@ export const ExpenseItem = ({
   onToggle,
   onEdit,
 }: ExpenseItemProps) => {
+  const {formatAmount} = useCurrency();
   return (
     <li className={settled ? "expense expense--settled" : "expense"}>
       <input
@@ -31,7 +33,7 @@ export const ExpenseItem = ({
         <span className="expense__label">{label}</span>
         <span className="expense__meta">payé par {paidBy}</span>
       </div>
-      <span className="expense__amount">{formatEUR(amountCents)}</span>
+      <span className="expense__amount">{formatAmount(amountCents)}</span>
       <button className="expense__delete" onClick={onDelete}>
         Supprimer
       </button>
