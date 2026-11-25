@@ -57,9 +57,9 @@ export const GroupPage = () => {
     setEditingId(id);
   };
 
-  const visible = groupExpenses.filter((expense) =>
-    expense.label.toLowerCase().includes(searchValue.toLowerCase()),
-  );
+  // const visible = groupExpenses.filter((expense) =>
+  //   expense.label.toLowerCase().includes(searchValue.toLowerCase()),
+  // );
 
   const totalNotPaid = groupExpenses.reduce(
     (sum, expense) => (expense.settled ? sum : sum + expense.amountCents),
