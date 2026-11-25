@@ -4,6 +4,7 @@ import { expensesReducer } from "../state/expensesReducer";
 import { initialExpenses, initialGroups } from "../data";
 import { loadExpenses, saveExpenses } from "../state/expensesStorage";
 import { ExpensesContext } from "./ExpensesContext";
+import type { Group } from "../types";
 
 export const ExpensesProvider = ({children}: PropsWithChildren) => {
   const [expenses, dispatch] = useReducer(expensesReducer, initialExpenses, loadExpenses)
@@ -15,6 +16,10 @@ export const ExpensesProvider = ({children}: PropsWithChildren) => {
   useEffect(() => {
     saveExpenses(expenses);
   }, [expenses])
+
+  const addGroup = (group: Group) => {
+    setGroups((prev) => [...prev, group])
+  };
     
   const addMember = (groupId: string, name: string) => {
     setGroups((prev) =>
@@ -25,7 +30,7 @@ export const ExpensesProvider = ({children}: PropsWithChildren) => {
   };
 
   return(
-    <ExpensesContext value={{addGroup: ()=>{}, addMember, dispatch, expenses, groups}}>
+    <ExpensesContext value={{addGroup, addMember, dispatch, expenses, groups}}>
       {children}
     </ExpensesContext>
   )
